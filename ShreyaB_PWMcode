@@ -1,0 +1,25 @@
+int feedbackIn = A1; // to detect feedback voltage from load
+int potentiometer = A0; // to detect output voltage from potentiometer
+int pwm = 6; //connected to MOSFET
+void setup() {
+  // put your setup code here, to run once:
+TCCR0A = 0b10000011; //timer
+TCCR0B = 0b00000001; //timer at 62.5 kHZ right now
+OCR0A = 76; // a lower bound duty cycle of 30%
+pinMode(pwm, OUTPUT); 
+}
+void loop() {
+  // put your main code here, to run repeatedly:
+  int voltage; 
+  int vfeedback; 
+
+  OCR0A = constrain(OCR0A, 76, 178); 
+  voltage = map(analogRead(potentiometer), 0, 1023, 76, 178); 
+  vfeedback = map(analogRead(potentiometer), 491, 737, 76, 178); 
+  
+  if (vfeedback > voltage) 
+      OCR0A = OCR0A - 5; 
+  if (vfeedback < voltage)
+      OCR0A = OCR0A + 5; 
+  delay(100); 
+}
