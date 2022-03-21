@@ -8,18 +8,20 @@ double RESISTER_VALUE_TWO = 120;
 
 int DutyCycle = 50;
 
-double  setCharge = 9;
+double  setCharge = 8.3;
 double  outDC= 0;
 double  DCtemp = 0;
 
 void setup() {
-Serial.begin(9600);
+  initBluetooth();
+//Serial.begin(9600);
 TCCR0B = TCCR0B &11111000 | B00000001;//62kHz
 pinMode(HzOutPut, outDC);
 
 }
 // main part
 void loop() {
+  updateSerial();
   //get the read from A0
   inputV = analogRead(A0);
   //
@@ -31,17 +33,17 @@ void loop() {
 
 double DutyCycleCauculation(double inputV, double setCharge, double preDC){
   double realVin = (inputV*0.0045)*5;
-  Serial.print("Vin:");
-  Serial.print(realVin);
+  //Serial.print("Vin:");
+  //Serial.print(realVin);
 
   double out = preDC;
-  if (realVin< setCharge+0.5 && out<50){
+  if (realVin< setCharge && out<100){
     out++;
   }
- else if(realVin > setCharge-0.5 && out>1){
+ else if(realVin > setCharge && out>1){
   out--; 
  }
-  Serial.print("VoutDC:");
-  Serial.print(out);
+  //Serial.print("VoutDC:");
+  //Serial.print(out);
   return out;
 }
