@@ -8,7 +8,7 @@ double RESISTER_VALUE_TWO = 120;
 
 int DutyCycle = 50;
 
-double  setCharge = 8.3;
+double  setCharge = 9;
 double  outDC= 0;
 double  DCtemp = 0;
 
@@ -21,7 +21,7 @@ pinMode(HzOutPut, outDC);
 }
 // main part
 void loop() {
-  updateSerial();
+  //updateSerial();
   //get the read from A0
   inputV = analogRead(A0);
   //
@@ -33,17 +33,18 @@ void loop() {
 
 double DutyCycleCauculation(double inputV, double setCharge, double preDC){
   double realVin = (inputV*0.0045)*5;
-  //Serial.print("Vin:");
-  //Serial.print(realVin);
+  Serial.print("Vin:");
+  Serial.print(realVin);
+  //Serial.print(\0);
 
   double out = preDC;
-  if (realVin< setCharge && out<100){
+  if (realVin< setCharge && out<200){
     out++;
   }
  else if(realVin > setCharge && out>1){
   out--; 
  }
-  //Serial.print("VoutDC:");
-  //Serial.print(out);
+  Serial.print("VoutDC:");
+  Serial.print(out);
   return out;
 }
