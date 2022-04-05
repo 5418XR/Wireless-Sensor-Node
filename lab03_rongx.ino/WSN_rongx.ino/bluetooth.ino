@@ -4,12 +4,12 @@ SoftwareSerial mySerial(10, 11); // TX, RX
 
 void initBluetooth(){
   // put your setup code here, to run once:
-  mySerial.begin(115200);
-  Serial.begin(115200);
+  mySerial.begin(9600);
+  //Serial.begin(9600);
  
   sendCommand("AT");
   sendCommand("AT+NAMEMyName");
-  sendCommand("AT+BAUD8");
+  sendCommand("AT+BAUD0");
   sendCommand("AT+VERSION");
   sendCommand("AT+LADDR");
   sendCommand("AT+BAUD");
