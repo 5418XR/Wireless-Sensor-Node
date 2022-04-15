@@ -70,15 +70,28 @@ void loop() {
       outDC = DutyCycleCauculation(inputV, setCharge, DCtemp);
       realBatteryV = BatteryV*0.0045*6.25*0.37;
       analogWrite(HzOutPut, outDC);
+      digitalWrite(5, LOW);
       clocknumber = 30000;
   }
   if (STAGE == 3){
+    ADCSRA &= ~(1<<ADEN);  // adc off
     analogWrite(HzOutPut, ZERO);
+    delay(100);
     clocknumber = 30000;
+    ADCSRA |= (1<<ADEN); 
   }
   if (STAGE == 4){
-    analogWrite(HzOutPut, ZERO);
-    clocknumber = 300000*6.2*10;
+    ADCSRA &= ~(1<<ADEN);
+        //delay(10000000);
+    //analogWrite(HzOutPut, ZERO);
+    //clocknumber = 30000;
+        Serial.println("EnterSleep...");
+        delay(10000);
+        enterSleep();
+        enterSleep();
+        enterSleep();
+        enterSleep();
+        ADCSRA |= (1<<ADEN); 
   }
   //analogWrite(HzOutPut, outDC);
 
