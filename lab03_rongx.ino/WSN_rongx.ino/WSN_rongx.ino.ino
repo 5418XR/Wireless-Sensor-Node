@@ -1,3 +1,6 @@
+#include <avr/power.h>
+#include <avr/wdt.h>
+#include <avr/sleep.h>
 
 int HzOutPut =6;
 double inputV = A0;
@@ -39,6 +42,10 @@ double clocknumber = 0;
 
 //int defult
 int ZERO=0;
+
+//WDT
+int f_wdt=1;
+
 void setup() {
   Serial.begin(9600);
   //initBluetooth();
@@ -78,19 +85,23 @@ void loop() {
     analogWrite(HzOutPut, ZERO);
     delay(100);
     clocknumber = 30000;
-    ADCSRA |= (1<<ADEN); 
+    ADCSRA |= (1<<ADEN);
+    if(f_wdt==1){
+    f_wdt=0;
+    enterSleep(); 
+    }
   }
   if (STAGE == 4){
     ADCSRA &= ~(1<<ADEN);
         //delay(10000000);
     //analogWrite(HzOutPut, ZERO);
     //clocknumber = 30000;
-        Serial.println("EnterSleep...");
+        Serial.println("Sleeping...");
         delay(10000);
-        enterSleep();
-        enterSleep();
-        enterSleep();
-        enterSleep();
+        if(f_wdt==1) {
+        f_wdt=0;
+        enterSleep(); 
+        }
         ADCSRA |= (1<<ADEN); 
   }
   //analogWrite(HzOutPut, outDC);
@@ -144,4 +155,11 @@ double DutyCycleCauculation(double inputV, double setCharge, double preDC){
  dutysycle = out;
 
   return out;
+}
+
+//interrupt
+ISR(WDT_vect){
+  if(f_wdt==0){
+    f_wdt=1;
+  }
 }
