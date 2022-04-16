@@ -15,7 +15,7 @@ double RESISTER_VALUE_TWO = 120;
 
 int DutyCycle = 50;
 
-double  setCharge = 9;
+double  setCharge = 9.2;
 double  outDC= 0;
 double  DCtemp = 0;
 
@@ -44,18 +44,37 @@ double clocknumber = 0;
 int ZERO=0;
 
 //WDT
-int f_wdt=1;
+volatile int f_wdt=0;
 
 void setup() {
-  Serial.begin(9600);
-  //initBluetooth();
+  //Serial.begin(9600);
+  initBluetooth();
 
+  /*** Setup the WDT ***/
+  
+  /* Clear the reset flag. */
+  MCUSR &= ~(1<<WDRF);
+  
+  /* In order to change WDE or the prescaler, we need to
+   * set WDCE (This will allow updates for 4 clock cycles).
+   */
+  WDTCSR |= (1<<WDCE) | (1<<WDE);
+
+  /* set new watchdog timeout prescaler value */
+  WDTCSR = 1<<WDP0 | 1<<WDP3; /* 8.0 seconds */
+  
+  /* Enable the WD interrupt (note no reset). */
+  WDTCSR |= _BV(WDIE);
+  
+  Serial.println("Initialisation complete.");
+  delay(100); //Allow for serial print to complete.
 TCCR0B = TCCR0B &11111000 | B00000001;//62kHz
 pinMode(HzOutPut, outDC);
 myTime2 = myTime1;
 }
 // main part
 void loop() {
+    f_wdt = 0;
   //updateSerial();
   //get the read from A0
   inputV = analogRead(A0);
@@ -68,41 +87,55 @@ void loop() {
 //  outDC = DutyCycleCauculation(inputV, setCharge, DCtemp);
 //  realBatteryV = BatteryV*0.0045*6.25*0.37;
   if (STAGE == 1){
+      realBatteryV = BatteryV*0.0045*6.25*0.32;
       analogWrite(HzOutPut, ZERO);
-      digitalWrite(5, HIGH); // 5 to pmose
-      clocknumber = 300000*6.2;
+      //digitalWrite(5, HIGH); // 5 to pmose
+      clocknumber = 300000;
+      //analogWrite(HzOutPut, ZERO);
   }
   if (STAGE == 2 || STAGE == 0){
       double  DCtemp = outDC;
       outDC = DutyCycleCauculation(inputV, setCharge, DCtemp);
-      realBatteryV = BatteryV*0.0045*6.25*0.37;
+      realBatteryV = BatteryV*0.0045*6.25*0.32;
       analogWrite(HzOutPut, outDC);
-      digitalWrite(5, LOW);
-      clocknumber = 30000;
+      //digitalWrite(5, LOW);
+      clocknumber = 300000;
   }
   if (STAGE == 3){
-    ADCSRA &= ~(1<<ADEN);  // adc off
-    analogWrite(HzOutPut, ZERO);
-    delay(100);
-    clocknumber = 30000;
-    ADCSRA |= (1<<ADEN);
-    if(f_wdt==1){
-    f_wdt=0;
+    realBatteryV = BatteryV*0.0045*6.25*0.32;
+//    ADCSRA &= ~(1<<ADEN);  // adc off
+//    analogWrite(HzOutPut, ZERO);
+//    delay(100);
+//    clocknumber = 300000;
+    //ADCSRA |= (1<<ADEN);
+//    if (realBatteryV>0){
+//      f_wdt = 0;
+//    }
+      if(f_wdt == 0)
+  {
     enterSleep(); 
-    }
+  }
+  f_wdt = 0;
+  STAGE = 2;
   }
   if (STAGE == 4){
-    ADCSRA &= ~(1<<ADEN);
+    realBatteryV = BatteryV*0.0045*6.25*0.32;
+    //ADCSRA &= ~(1<<ADEN);
         //delay(10000000);
     //analogWrite(HzOutPut, ZERO);
-    //clocknumber = 30000;
+    clocknumber = 300000;
         Serial.println("Sleeping...");
-        delay(10000);
-        if(f_wdt==1) {
-        f_wdt=0;
-        enterSleep(); 
-        }
-        ADCSRA |= (1<<ADEN); 
+        delay(100);
+        //f_wdt=0;
+              if(f_wdt == 0)
+  {
+    enterSleep(); 
+    enterSleep(); 
+    enterSleep(); 
+  } 
+    f_wdt = 0;
+    STAGE = 2;
+       // ADCSRA |= (1<<ADEN); 
   }
   //analogWrite(HzOutPut, outDC);
 
@@ -120,10 +153,10 @@ void loop() {
     Serial.print("Vin:");
     Serial.println(chargein);
 
-  if (chargein>1 && realBatteryV>9){
+  if (chargein>1 && realBatteryV>9.2){
     STAGE = STAGE1;
   }
-  if (chargein>1 && realBatteryV<9){
+  if (chargein>1 && realBatteryV<9.2){
     STAGE = STAGE2;
   }
   if (chargein<1 && realBatteryV>7){
@@ -158,8 +191,11 @@ double DutyCycleCauculation(double inputV, double setCharge, double preDC){
 }
 
 //interrupt
-ISR(WDT_vect){
-  if(f_wdt==0){
+ISR(WDT_vect)
+{
+  //realBatteryV = BatteryV*0.0045*6.25*0.32;
+  if(f_wdt == 0)
+  {
     f_wdt=1;
   }
 }

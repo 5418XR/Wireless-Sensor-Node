@@ -5,16 +5,18 @@ SoftwareSerial mySerial(10, 11); // TX, RX
 void initBluetooth(){
   // put your setup code here, to run once:
   mySerial.begin(9600);
-  //Serial.begin(9600);
+  Serial.begin(9600);
  
-  sendCommand("AT");
+  //sendCommand("AT");
+  //sendCommand("AT+BAUD8");
   sendCommand("AT+NAMEMyName");
-  sendCommand("AT+BAUD0");
+  sendCommand("AT+BAUD4");
   sendCommand("AT+VERSION");
   sendCommand("AT+LADDR");
   sendCommand("AT+BAUD");
   sendCommand("AT+PIN1234");
   //sendCommand("AT+DISC");
+  //sendCommand("AT+RESET");
 }
 
 void sendCommand(const char * command){
