@@ -3,7 +3,7 @@
 #include <avr/sleep.h>
 
 int HzOutPut =6;
-double inputV = A0;
+double inputV = A3;
 double BatteryV = A1;// not yet coding
 double chargein = A2;// not yet coding
 
@@ -46,6 +46,18 @@ int ZERO=0;
 //WDT
 volatile int f_wdt=0;
 
+//temppreture defultes-------------------------------------------
+#define RT0 10000   // 10000 ohms
+#define B 3900      //Constant taken from data sheet
+#define Vs 5    //Supply voltage
+#define R 10000  //Resistance of thermistor is 10000 ohms
+
+//defining variables
+float RT, VR, lnRfrac, temp, T0, ThermistorOut;
+//----------------------------------------------------------------
+
+
+
 void setup() {
   //Serial.begin(9600);
   initBluetooth();
@@ -71,16 +83,54 @@ void setup() {
 TCCR0B = TCCR0B &11111000 | B00000001;//62kHz
 pinMode(HzOutPut, outDC);
 myTime2 = myTime1;
+
+//----------------------------------------
+  //conversion of room temp from C to K
+  T0 = 25 + 273.15;
+//--------------------------------------------
 }
 // main part
 void loop() {
     f_wdt = 0;
   //updateSerial();
-  //get the read from A0
-  inputV = analogRead(A0);
+  //get the read from A3
+  inputV = analogRead(A3);
   BatteryV = analogRead(A1);
   chargein = analogRead(A2);
   //
+
+
+//--------------------------------------------
+  // put your main code here, to run repeatedly: 
+
+  
+  //Reading value from thermistor
+  ThermistorOut = analogRead(A0);    
+  //Converting value to voltage
+  //1023 is max value of ADC          
+  ThermistorOut = (5.00 / 1023.00) * ThermistorOut;   
+  //Obtaining necessary values for VR and RT   
+  VR = Vs - ThermistorOut;
+  RT = ThermistorOut / (VR / R); 
+
+  //Taking ln of r/r0             
+  lnRfrac = log(RT / RT0);
+
+  //using overall equation to get obtain temperature in kelvin
+  temp = (1 / ((lnRfrac / B) + (1 / T0))); 
+  //converting from K to C
+  temp = temp - 273.15;
+  //Converting from C to F 
+  temp = (temp*1.8) + 32; 
+
+  //Printing Values to Serial Monitor
+  Serial.print("Temperature: "); 
+  Serial.print(temp);
+  Serial.print(" F"); 
+  Serial.println(' '); 
+  //adding a delay so that values are displayed at a readable speed
+  delay(500);
+//---------------------------------------------------------
   
   
 //  double  DCtemp = outDC;
