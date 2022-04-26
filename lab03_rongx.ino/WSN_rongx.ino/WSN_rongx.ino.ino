@@ -1,20 +1,25 @@
-#include <avr/power.h>
-#include <avr/wdt.h>
-#include <avr/sleep.h>
+// instiallizing the the loading library 
+//#include <avr/power.h>
+//#include <avr/wdt.h>
+//#include <avr/sleep.h>
 
+//instializing the input pins
 int HzOutPut =6;
 double inputV = A3;
 double BatteryV = A1;// not yet coding
 double chargein = A2;// not yet coding
 
+//this is the gloable values for the DC/DC converter
 double boostVout = 0;
 double dutysycle = 0;
 
-double RESISTER_VALUE_ONE = 30;
-double RESISTER_VALUE_TWO = 120;
+//double RESISTER_VALUE_ONE = 30;
+//double RESISTER_VALUE_TWO = 120;
 
+//dutysycle instialize value
 int DutyCycle = 50;
 
+//DC intialize and charge target
 double  setCharge = 9.2;
 double  outDC= 0;
 double  DCtemp = 0;
@@ -23,14 +28,14 @@ double  DCtemp = 0;
 unsigned long myTime1;
 unsigned long myTime2;
 
-//Vb
+//Bettery voltage detect
 double realBatteryV =0;
 
 
-//vin 
+//voltage input
 double  Vin = 0;
 
-//int stage
+//inistalize stage
 int STAGE = 0;
 int STAGE1 = 1;
 int STAGE2 = 2;
