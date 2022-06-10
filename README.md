@@ -15,5 +15,4 @@ circuit. A DC/DC converter will be used to increase the power from the Solar Pan
 level needed to charge the battery. This battery is what will power our Arduino which reads and 
 transmits the temperature data. We used a PWM to regulate the DC/DC converter in order to 
 save power. We went above and beyond the requirements by developing an Android app that 
-monitored the temperature. This report will delve into the specific design process taken to 
-develop this project. 
+monitored the temperature.(See more detail in Final_report PDF) 
